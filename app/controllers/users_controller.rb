@@ -8,7 +8,7 @@ class UsersController < ApplicationController
 
   # GET /users/1 or /users/1.json
   def show
-    @user = User.find(params[:id])
+    @user = User.find_by(id: params[:id])
   end
 
   # GET /users/new
@@ -24,6 +24,7 @@ class UsersController < ApplicationController
   # POST /users or /users.json
   def create
     @user = User.new(user_params)
+    @user.remote_avatar_url = params[:user][:image]
     if @user.save
       redirect_to user_path(@user), notice: 'Ban tao thanh cong'
     else

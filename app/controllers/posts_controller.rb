@@ -3,7 +3,10 @@ class PostsController < ApplicationController
 
   # GET /posts or /posts.json
   def index
-    @posts = Post.all
+    @posts = Post.includes(:author)
+                 .page(params[:page])
+                 .per(params[:rows])
+    @total = @posts.total_count
   end
 
   # GET /posts/1 or /posts/1.json
@@ -23,14 +26,10 @@ class PostsController < ApplicationController
   def create
     @post = Post.new(post_params)
 
-    respond_to do |format|
-      if @post.save
-        format.html { redirect_to post_url(@post), notice: "Post was successfully created." }
-        format.json { render :show, status: :created, location: @post }
-      else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @post.errors, status: :unprocessable_entity }
-      end
+    if @post.save
+      render json: { status: true, post: @post.slice(:id, :desc, :title, :id)}
+    else
+       render json: @post.errors, status: :unprocessable_entity
     end
   end
 
@@ -65,6 +64,6 @@ class PostsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def post_params
-      params.require(:post).permit(:title, :desc)
+      params.require(:post).permit(:title, :desc, :user_id)
     end
 end
